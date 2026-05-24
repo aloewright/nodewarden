@@ -18,6 +18,18 @@ const DEFAULT_CORS_HEADERS = [
   'X-NodeWarden-Web-Session',
 ];
 
+const EXTENSION_FRAME_ANCESTORS = [
+  "'self'",
+  'chrome-extension:',
+  'moz-extension:',
+  'safari-web-extension:',
+].join(' ');
+
+const CONTENT_SECURITY_POLICY = [
+  `frame-ancestors ${EXTENSION_FRAME_ANCESTORS}`,
+  "img-src 'self' data:",
+].join('; ');
+
 function isExtensionOrigin(origin: string): boolean {
   return (
     origin.startsWith('chrome-extension://')
@@ -97,10 +109,9 @@ export function applyCors(
     headers.set(k, v);
   }
   // Security headers applied to every response.
-  headers.set('X-Frame-Options', 'DENY');
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Content-Security-Policy', "frame-ancestors 'none'; img-src 'self' data:");
+  headers.set('Content-Security-Policy', CONTENT_SECURITY_POLICY);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
