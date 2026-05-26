@@ -14,6 +14,7 @@ const PROFILE_SNAPSHOT_KEY = 'nodewarden.web.profile-snapshot.v1';
 const DEVICE_IDENTIFIER_KEY = 'nodewarden.web.device.identifier.v1';
 const TOTP_REMEMBER_TOKEN_KEY = 'nodewarden.web.totp.remember-token.v1';
 const WEB_SESSION_HEADER = 'X-NodeWarden-Web-Session';
+const EXTENSION_FRAME_HEADER = 'X-NodeWarden-Extension-Frame';
 
 export interface PreloginResult {
   hash: string;
@@ -82,6 +83,20 @@ function saveRememberTwoFactorToken(token: string | undefined): void {
 
 function clearRememberTwoFactorToken(): void {
   localStorage.removeItem(TOTP_REMEMBER_TOKEN_KEY);
+}
+
+function isExtensionFrame(): boolean {
+  if (typeof window === 'undefined') return false;
+  const search = new URLSearchParams(window.location.search || '');
+  if (search.get('extension') === '1') return true;
+  return /^(chrome|moz|safari)-extension:\/\//i.test(document.referrer || '');
+}
+
+function webSessionHeaders(): Record<string, string> {
+  return {
+    [WEB_SESSION_HEADER]: '1',
+    ...(isExtensionFrame() ? { [EXTENSION_FRAME_HEADER]: '1' } : {}),
+  };
 }
 
 export function loadSession(): SessionState | null {
@@ -259,7 +274,7 @@ export async function loginWithPassword(
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      [WEB_SESSION_HEADER]: '1',
+      ...webSessionHeaders(),
     },
     body: body.toString(),
   });
@@ -288,7 +303,7 @@ export async function refreshAccessToken(session: SessionState): Promise<Refresh
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        ...(session.authMode === 'web-cookie' ? { [WEB_SESSION_HEADER]: '1' } : {}),
+        ...(session.authMode === 'web-cookie' ? webSessionHeaders() : {}),
       },
       body: body.toString(),
     });
@@ -342,7 +357,7 @@ export async function revokeCurrentSession(session: SessionState | null): Promis
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      ...(session?.authMode === 'web-cookie' ? { [WEB_SESSION_HEADER]: '1' } : {}),
+      ...(session?.authMode === 'web-cookie' ? webSessionHeaders() : {}),
     },
     body: body.toString(),
   }).catch(() => undefined);

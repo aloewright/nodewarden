@@ -118,12 +118,49 @@ function normalizeRoutePath(path: string): string {
   const normalized = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
   return normalized.length > 1 ? normalized.replace(/\/+$/, '') : '/';
 }
+
+function extensionParentOrigin(): string | null {
+  if (typeof document === 'undefined') return null;
+  if (!/^(chrome|moz|safari)-extension:\/\//i.test(document.referrer || '')) return null;
+  try {
+    return new URL(document.referrer).origin;
+  } catch {
+    return null;
+  }
+}
+
+function cipherToAutofillLogin(cipher: Cipher) {
+  if (cipher.type !== 1 || !cipher.login?.decPassword) return null;
+  const urls = (cipher.login.uris || [])
+    .map((uri) => String(uri.decUri || uri.uri || '').trim())
+    .filter(Boolean);
+  if (!urls.length) return null;
+  return {
+    id: cipher.id,
+    name: cipher.decName || cipher.name || urls[0],
+    username: cipher.login.decUsername || cipher.login.username || '',
+    password: cipher.login.decPassword,
+    urls,
+    notes: cipher.decNotes || undefined,
+    favorite: cipher.favorite === true,
+    updatedAt: cipher.revisionDate ? Date.parse(cipher.revisionDate) || Date.now() : Date.now(),
+  };
+}
+
+function postAutofillSyncToExtension(ciphers: Cipher[]): void {
+  const targetOrigin = extensionParentOrigin();
+  if (!targetOrigin || typeof window === 'undefined' || window.parent === window) return;
+  const logins = ciphers.map(cipherToAutofillLogin).filter(Boolean);
+  window.parent.postMessage({ type: NODEWARDEN_AUTOFILL_SYNC, logins }, targetOrigin);
+}
 const THEME_STORAGE_KEY = 'nodewarden.theme.preference.v1';
 const SIGNALR_RECORD_SEPARATOR = String.fromCharCode(0x1e);
 const SIGNALR_UPDATE_TYPE_SYNC_VAULT = 5;
 const SIGNALR_UPDATE_TYPE_LOG_OUT = 11;
 const SIGNALR_UPDATE_TYPE_DEVICE_STATUS = 12;
 const SIGNALR_UPDATE_TYPE_BACKUP_RESTORE_PROGRESS = 13;
+const NODEWARDEN_AUTOFILL_REQUEST = 'NODEWARDEN_AUTOFILL_REQUEST';
+const NODEWARDEN_AUTOFILL_SYNC = 'NODEWARDEN_AUTOFILL_SYNC';
 
 type ThemePreference = 'system' | 'light' | 'dark';
 type LockTimeoutMinutes = 0 | 1 | 5 | 15 | 30;
@@ -251,6 +288,24 @@ export default function App() {
     window.addEventListener(APP_NOTIFY_EVENT, handleAppNotify as EventListener);
     return () => window.removeEventListener(APP_NOTIFY_EVENT, handleAppNotify as EventListener);
   }, [pushToast]);
+
+  useEffect(() => {
+    postAutofillSyncToExtension(decryptedCiphers);
+  }, [decryptedCiphers]);
+
+  useEffect(() => {
+    const parentOrigin = extensionParentOrigin();
+    if (!parentOrigin) return;
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== parentOrigin) return;
+      const data = event.data as { type?: string } | null;
+      if (data?.type === NODEWARDEN_AUTOFILL_REQUEST) {
+        postAutofillSyncToExtension(decryptedCiphers);
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [decryptedCiphers]);
 
   useEffect(() => {
     const syncInviteFromUrl = () => {
