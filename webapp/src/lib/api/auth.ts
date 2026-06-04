@@ -89,7 +89,7 @@ function isExtensionFrame(): boolean {
   if (typeof window === 'undefined') return false;
   const search = new URLSearchParams(window.location.search || '');
   if (search.get('extension') === '1') return true;
-  return /^(chrome|moz|safari)-extension:\/\//i.test(document.referrer || '');
+  return /^(chrome|moz|safari(-web)?)-extension:\/\//i.test(document.referrer || '');
 }
 
 function webSessionHeaders(): Record<string, string> {
