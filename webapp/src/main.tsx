@@ -5,6 +5,38 @@ import { initI18n } from './lib/i18n';
 import './tailwind.css';
 import './styles.css';
 
+const RESIZE_OBSERVER_LOOP_MESSAGES = new Set([
+  'ResizeObserver loop completed with undelivered notifications.',
+  'ResizeObserver loop limit exceeded',
+]);
+
+function isResizeObserverLoopError(message: unknown): boolean {
+  return typeof message === 'string' && RESIZE_OBSERVER_LOOP_MESSAGES.has(message);
+}
+
+function suppressResizeObserverLoopErrors(): void {
+  window.addEventListener(
+    'error',
+    (event) => {
+      if (!isResizeObserverLoopError(event.message)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },
+    true
+  );
+
+  const previousOnError = window.onerror;
+  window.onerror = (message, source, lineno, colno, error) => {
+    if (isResizeObserverLoopError(message)) return true;
+    if (typeof previousOnError === 'function') {
+      return previousOnError.call(window, message, source, lineno, colno, error);
+    }
+    return false;
+  };
+}
+
+suppressResizeObserverLoopErrors();
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

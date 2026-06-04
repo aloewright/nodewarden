@@ -54,6 +54,21 @@ function isSameOriginWriteRequest(request: Request): boolean {
   return false;
 }
 
+function isAllowedCredentialClientWriteRequest(request: Request): boolean {
+  if (isSameOriginWriteRequest(request)) {
+    return true;
+  }
+  const origin = request.headers.get('Origin');
+  const referer = request.headers.get('Referer');
+  const isExtension = (val: string | null) =>
+    val != null && (
+      val.startsWith('chrome-extension://') ||
+      val.startsWith('moz-extension://') ||
+      val.startsWith('safari-web-extension://')
+    );
+  return isExtension(origin) || isExtension(referer);
+}
+
 function getDefaultWebsiteIconSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="Globe icon"><circle cx="48" cy="48" r="34" fill="none" stroke="#8ea9c7" stroke-width="6"/><path d="M14 48h68M48 14c10 10 16 21.5 16 34s-6 24-16 34c-10-10-16-21.5-16-34s6-24 16-34zm-24 10c8 5 17 8 24 8s16-3 24-8m-48 48c8-5 17-8 24-8s16 3 24 8" fill="none" stroke="#8ea9c7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
@@ -429,7 +444,7 @@ export async function handlePublicRoute(
   if (path === '/api/accounts/password-hint' && method === 'POST') {
     const blocked = await enforcePublicRateLimit('public-sensitive', LIMITS.rateLimit.sensitivePublicRequestsPerMinute);
     if (blocked) return blocked;
-    if (!isSameOriginWriteRequest(request)) {
+    if (!isAllowedCredentialClientWriteRequest(request)) {
       return new Response(JSON.stringify({ error: 'Forbidden origin' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' },
@@ -454,7 +469,7 @@ export async function handlePublicRoute(
   if (path === '/api/accounts/register' && method === 'POST') {
     const blocked = await enforcePublicRateLimit('register', LIMITS.rateLimit.registerRequestsPerMinute);
     if (blocked) return blocked;
-    if (!isSameOriginWriteRequest(request)) {
+    if (!isAllowedCredentialClientWriteRequest(request)) {
       return new Response(JSON.stringify({ error: 'Forbidden origin' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' },
