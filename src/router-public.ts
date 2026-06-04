@@ -55,13 +55,18 @@ function isSameOriginWriteRequest(request: Request): boolean {
 }
 
 function isAllowedCredentialClientWriteRequest(request: Request): boolean {
-  const origin = request.headers.get('Origin') || '';
-  return (
-    isSameOriginWriteRequest(request) ||
-    origin.startsWith('chrome-extension://') ||
-    origin.startsWith('moz-extension://') ||
-    origin.startsWith('safari-web-extension://')
-  );
+  if (isSameOriginWriteRequest(request)) {
+    return true;
+  }
+  const origin = request.headers.get('Origin');
+  const referer = request.headers.get('Referer');
+  const isExtension = (val: string | null) =>
+    val != null && (
+      val.startsWith('chrome-extension://') ||
+      val.startsWith('moz-extension://') ||
+      val.startsWith('safari-web-extension://')
+    );
+  return isExtension(origin) || isExtension(referer);
 }
 
 function getDefaultWebsiteIconSvg(): string {
