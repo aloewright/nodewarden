@@ -20,6 +20,7 @@ const TWO_FACTOR_REMEMBER_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const TWO_FACTOR_PROVIDER_AUTHENTICATOR = 0;
 const TWO_FACTOR_PROVIDER_REMEMBER = 5;
 const WEB_REFRESH_COOKIE = 'nodewarden_web_refresh';
+const EXTENSION_FRAME_HEADER = 'X-NodeWarden-Extension-Frame';
 // Android client (2026.2.x) deserializes TwoFactorProviders2 keys with -1 for recovery code.
 // Keep request parsing backward-compatible with historical provider values (8 / 100).
 const TWO_FACTOR_PROVIDER_RECOVERY_CODE_RESPONSE = '-1';
@@ -48,6 +49,10 @@ function shouldUseWebSession(request: Request): boolean {
   return String(request.headers.get('X-NodeWarden-Web-Session') || '').trim() === '1';
 }
 
+function shouldUseExtensionFrameCookie(request: Request): boolean {
+  return String(request.headers.get(EXTENSION_FRAME_HEADER) || '').trim() === '1';
+}
+
 function parseCookieValue(request: Request, name: string): string | null {
   const rawCookie = String(request.headers.get('Cookie') || '').trim();
   if (!rawCookie) return null;
@@ -74,11 +79,12 @@ function constantTimeEquals(a: string, b: string): boolean {
 
 function buildRefreshCookie(request: Request, refreshToken: string, maxAgeSeconds: number): string {
   const isHttps = new URL(request.url).protocol === 'https:';
+  const extensionFrameCookie = isHttps && shouldUseExtensionFrameCookie(request);
   const parts = [
     `${WEB_REFRESH_COOKIE}=${encodeURIComponent(refreshToken)}`,
     'Path=/identity/connect',
     'HttpOnly',
-    'SameSite=Strict',
+    extensionFrameCookie ? 'SameSite=None' : 'SameSite=Strict',
     `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`,
   ];
   if (isHttps) parts.push('Secure');
