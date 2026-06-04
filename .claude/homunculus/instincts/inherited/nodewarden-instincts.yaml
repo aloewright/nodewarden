@@ -1,0 +1,377 @@
+# Instincts generated from https://github.com/aloewright/nodewarden
+# Generated: 2026-06-04T03:33:36.044Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: nodewarden-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/aloewright/nodewarden
+---
+
+# Nodewarden Commit Length
+
+## Action
+
+Keep commit messages concise (~42 characters)
+
+## Evidence
+
+- Average commit message length: 42 chars
+- Based on 2 commits
+
+---
+id: nodewarden-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/aloewright/nodewarden
+---
+
+# Nodewarden Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: nodewarden-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/aloewright/nodewarden
+---
+
+# Nodewarden Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: nodewarden-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/aloewright/nodewarden
+---
+
+# Nodewarden Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: nodewarden-arch-type-based
+trigger: "when adding new code"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/aloewright/nodewarden
+---
+
+# Nodewarden Arch Type Based
+
+## Action
+
+Place code in the appropriate type folder (components/, services/, utils/, etc.)
+
+## Evidence
+
+- Type-based module organization detected
+- Folders: handlers
+
+---
+id: nodewarden-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/aloewright/nodewarden
+---
+
+# Nodewarden Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: nodewarden-instinct-file-naming
+trigger: "When creating a new file in the codebase"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct File Naming
+
+## Action
+
+Name the file using camelCase
+
+## Evidence
+
+- Pattern in namingConventions.files
+- Examples in src/webapp
+
+---
+id: nodewarden-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions
+- Examples in src/webapp/src/lib/api/auth.ts
+
+---
+id: nodewarden-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: nodewarden-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: nodewarden-instinct-import-alias
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Import Alias
+
+## Action
+
+Use alias import style
+
+## Evidence
+
+- Pattern in importStyle
+- Examples in src/webapp/src/lib/api/auth.ts
+
+---
+id: nodewarden-instinct-named-exports
+trigger: "When exporting functions or classes"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Named Exports
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle
+- Examples in src/webapp/src/lib/api/auth.ts
+
+---
+id: nodewarden-instinct-commit-prefix-fix
+trigger: "When committing a bug fix"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Commit Prefix Fix
+
+## Action
+
+Prefix the commit message with 'fix'
+
+## Evidence
+
+- Seen in commit 'fix(web-vault): sync iframe sessions with extension'
+
+---
+id: nodewarden-instinct-commit-format-type-scope
+trigger: "When writing a commit message for a code change"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Commit Format Type Scope
+
+## Action
+
+Format the commit as 'type(scope): description' when possible
+
+## Evidence
+
+- Seen in commit 'fix(web-vault): sync iframe sessions with extension'
+
+---
+id: nodewarden-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Commit Length
+
+## Action
+
+Keep the commit message concise (around 42 characters on average)
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: nodewarden-instinct-try-catch-errors
+trigger: "When handling errors in code"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Try Catch Errors
+
+## Action
+
+Use try-catch blocks for error handling
+
+## Evidence
+
+- Pattern in errorHandling.style
+
+---
+id: nodewarden-instinct-global-error-handler
+trigger: "When setting up error handling for the application"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Global Error Handler
+
+## Action
+
+Implement a global error handler
+
+## Evidence
+
+- Pattern in errorHandling.globalHandler
+
+---
+id: nodewarden-instinct-separate-tests
+trigger: "When adding new tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Separate Tests
+
+## Action
+
+Place tests in a separate location from source code
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: nodewarden-instinct-type-based-modules
+trigger: "When organizing code modules"
+confidence: 0.7
+domain: architecture
+source: repo-analysis
+source_repo: aloewright/nodewarden
+---
+
+# Nodewarden Instinct Type Based Modules
+
+## Action
+
+Group modules by type
+
+## Evidence
+
+- Pattern in architecture.moduleOrganization
+
